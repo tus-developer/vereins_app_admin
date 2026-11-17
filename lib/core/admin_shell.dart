@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'user_permissions.dart';
 import '../features/news/news_admin_view.dart';
 import '../features/termine/termine_admin_view.dart';
+import '../features/benutzer/benutzer_admin_view.dart';
+import '../features/mannschaften/mannschaften_admin_view.dart';
 
 class AdminShell extends StatefulWidget {
   final UserPermissions permissions;
@@ -30,7 +32,25 @@ class _AdminShellState extends State<AdminShell> {
         selectedIcon: Icons.event,
         view: TermineAdminView(permissions: widget.permissions),
       ),
+      if (widget.permissions.canAccessUserAdmin)
+        (
+          label: 'Benutzer',
+          icon: Icons.people_outline,
+          selectedIcon: Icons.people,
+          view: BenutzerAdminView(permissions: widget.permissions),
+        ),
+      if (widget.permissions.canManageMannschaften)
+        (
+          label: 'Mannschaften',
+          icon: Icons.sports_handball_outlined,
+          selectedIcon: Icons.sports_handball,
+          view: const MannschaftenAdminView(),
+        ),
     ];
+
+    if (_selectedIndex >= modules.length) {
+      _selectedIndex = 0;
+    }
 
     final roleLabel = widget.permissions.isSuperadmin
         ? 'Superadmin'

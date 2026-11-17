@@ -19,8 +19,13 @@ class UserRoleEntry {
     );
   }
 
-  /// Superadmin hat in Firestore kein 'status'-Feld, alle anderen brauchen 'freigegeben'
-  bool get isActive => rolle == 'Superadmin' || status == 'freigegeben';
+  bool get isActive {
+    final r = rolle.toLowerCase();
+    return r == 'superadmin' ||
+        status == 'freigegeben' ||
+        status == 'aktiv' ||
+        (status == null && (r == 'vereinsadmin' || r == 'vorstand' || r == 'admin'));
+  }
 }
 
 class UserPermissions {
@@ -30,6 +35,7 @@ class UserPermissions {
   final bool isSuperadmin;
   final bool isAbteilungsAdmin;
   final List<String> adminTeams;
+  final List<String> teamAdminOnlyTeams;
 
   UserPermissions({
     required this.uid,
@@ -38,10 +44,17 @@ class UserPermissions {
     required this.isSuperadmin,
     required this.isAbteilungsAdmin,
     required this.adminTeams,
+    required this.teamAdminOnlyTeams,
   });
 
   bool get hasWebAdminAccess =>
       isSuperadmin || isAbteilungsAdmin || adminTeams.isNotEmpty;
+
+  bool get canAccessUserAdmin =>
+      isSuperadmin || isAbteilungsAdmin || teamAdminOnlyTeams.isNotEmpty;
+
+  /// Mannschaften anlegen/löschen dürfen nur Superadmins und Abteilungs-/Vereinsadmins
+  bool get canManageMannschaften => isSuperadmin || isAbteilungsAdmin;
 
   String get fullName => '$vorname $nachname'.trim();
 
@@ -57,6 +70,11 @@ class UserPermissions {
       return adminTeams.contains(teamName);
     }
     return false;
+  }
+
+  bool canApproveTeam(String team) {
+    if (isSuperadmin || isAbteilungsAdmin) return true;
+    return teamAdminOnlyTeams.contains(team);
   }
 
   List<String> allowedSichtbarkeiten(List<String> allTeamNames) {
@@ -93,13 +111,22 @@ class UserPermissions {
         .where((r) => r.isActive)
         .toList();
 
-    final isSuperadmin = rawRollen.any((r) => r.rolle == 'Superadmin');
+    final isSuperadmin = rawRollen.any(
+      (r) => const {'superadmin', 'vereinsadmin', 'vorstand'}.contains(r.rolle.toLowerCase()),
+    );
     final isAbteilungsAdmin = rawRollen.any(
-      (r) => r.rolle == 'Abteilungsleiter' || r.rolle == 'Jugendleiter',
+      (r) => const {'abteilungsleiter', 'jugendleiter', 'admin'}.contains(r.rolle.toLowerCase()),
     );
 
     final adminTeams = rawRollen
-        .where((r) => r.rolle == 'Teamadmin' || r.rolle == 'Trainer')
+        .where((r) => const {'teamadmin', 'trainer'}.contains(r.rolle.toLowerCase()))
+        .map((r) => r.team)
+        .where((t) => t.isNotEmpty)
+        .toSet()
+        .toList();
+
+    final teamAdminOnlyTeams = rawRollen
+        .where((r) => r.rolle.toLowerCase() == 'teamadmin')
         .map((r) => r.team)
         .where((t) => t.isNotEmpty)
         .toSet()
@@ -112,6 +139,7 @@ class UserPermissions {
       isSuperadmin: isSuperadmin,
       isAbteilungsAdmin: isAbteilungsAdmin,
       adminTeams: adminTeams,
+      teamAdminOnlyTeams: teamAdminOnlyTeams,
     );
   }
 }
