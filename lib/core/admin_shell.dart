@@ -60,14 +60,32 @@ class _AdminShellState extends State<AdminShell> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('TuS Neuhofen Handball – Web-Verwaltung'),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.asset(
+                'assets/images/logo.png',
+                height: 32,
+                width: 32,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => const Icon(Icons.sports_handball),
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text('TuS Neuhofen Handball – Web-Verwaltung'),
+          ],
+        ),
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Center(
               child: Text(
                 '${widget.permissions.fullName} ($roleLabel)',
-                style: Theme.of(context).textTheme.bodySmall,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.white70,
+                    ),
               ),
             ),
           ),
