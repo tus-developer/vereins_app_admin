@@ -60,4 +60,5 @@ class DefaultFirebaseOptions {
     authDomain: 'tus-neuhofen-app.firebaseapp.com',
     storageBucket: 'tus-neuhofen-app.firebasestorage.app',
   );
+
 }
