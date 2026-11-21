@@ -53,8 +53,11 @@ class UserPermissions {
   bool get canAccessUserAdmin =>
       isSuperadmin || isAbteilungsAdmin || teamAdminOnlyTeams.isNotEmpty;
 
-  /// Mannschaften anlegen/löschen dürfen nur Superadmins und Abteilungs-/Vereinsadmins
+  /// Neue Mannschaften anlegen/löschen dürfen nur Superadmins und Abteilungs-/Vereinsadmins
   bool get canManageMannschaften => isSuperadmin || isAbteilungsAdmin;
+
+  /// Die Mannschafts- und Kader-Übersicht sehen alle Admins, Teamadmins und Trainer
+  bool get canViewMannschaften => hasWebAdminAccess;
 
   String get fullName => '$vorname $nachname'.trim();
 

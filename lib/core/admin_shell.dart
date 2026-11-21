@@ -39,12 +39,12 @@ class _AdminShellState extends State<AdminShell> {
           selectedIcon: Icons.people,
           view: BenutzerAdminView(permissions: widget.permissions),
         ),
-      if (widget.permissions.canManageMannschaften)
+      if (widget.permissions.canViewMannschaften)
         (
           label: 'Mannschaften',
           icon: Icons.sports_handball_outlined,
           selectedIcon: Icons.sports_handball,
-          view: const MannschaftenAdminView(),
+          view: MannschaftenAdminView(permissions: widget.permissions),
         ),
     ];
 
